@@ -1,0 +1,14 @@
+{
+  "name": "IndoMaps",
+  "short_name": "IndoMaps",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#020617",
+  "background_color": "#020617",
+  "display": "standalone"
+}

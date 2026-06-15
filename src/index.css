@@ -1,0 +1,179 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+}
+
+/* Custom UI Polish */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  background-color: #0b0c10;
+}
+
+/* Range input styling tweaks */
+input[type="range"] {
+  height: 4px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: currentColor;
+  cursor: pointer;
+  border: 2px solid #0f172a;
+}
+
+/* Force the map container to override the library's fixed aspect-ratio and fill the viewport height */
+.mmap {
+  aspect-ratio: auto !important;
+  position: relative;
+  --mx: -200px;
+  --my: -200px;
+}
+
+/* grid-glow: cursor-following spotlight that brightens the grid behind the map */
+.mmap:not(.mmap--static)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(to right, var(--grid-glow, rgba(255, 255, 255, 0.14)) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-glow, rgba(255, 255, 255, 0.14)) 1px, transparent 1px);
+  background-size: 38px 38px;
+  -webkit-mask-image: radial-gradient(180px circle at var(--mx) var(--my), #000 0%, transparent 72%);
+  mask-image: radial-gradient(180px circle at var(--mx) var(--my), #000 0%, transparent 72%);
+}
+
+.mmap > svg {
+  position: relative;
+  z-index: 1;
+  display: block;
+  background: transparent !important;
+  background-image: none !important;
+}
+
+@media print {
+  @page {
+    margin: 0;
+  }
+
+  html,
+  body,
+  #root {
+    overflow: visible !important;
+    height: auto !important;
+    width: 100% !important;
+    background: white !important;
+  }
+
+  .poster-print-root {
+    display: block !important;
+    min-height: auto !important;
+    background: white !important;
+  }
+
+  .poster-print-root .print\:hidden,
+  .poster-print-root .poster-map-controls {
+    display: none !important;
+  }
+
+  .poster-preview-stage {
+    display: block !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  #poster-print-area {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none !important;
+    max-height: none !important;
+    aspect-ratio: unset !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .poster-sheet-inner {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .poster-map-slot {
+    flex: 1 1 auto !important;
+    min-height: 62% !important;
+    height: 62% !important;
+    overflow: visible !important;
+    position: relative !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .poster-map-live {
+    display: none !important;
+  }
+
+  .poster-print-map-fallback {
+    display: block !important;
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  .poster-map-slot > div,
+  .poster-map-slot svg {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  .poster-map-slot path {
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  .poster-text-slot {
+    flex: 0 0 auto !important;
+  }
+}
+

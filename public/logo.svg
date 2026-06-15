@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144.5 146" xmlns:bx="https://boxy-svg.com">
+  <defs>
+    <bx:export>
+      <bx:file format="svg"></bx:file>
+    </bx:export>
+  </defs>
+  <style type="text/css">.cls-0 {fill:#CE1431;}
+.cls-1 {fill:#FFFFFF;}
+.cls-2 {fill:none;stroke:#CE1431;stroke-width:5.7889;stroke-miterlimit:10;}
+.cls-3 {fill:#F2F2F2;}</style>
+  <path class="cls-0" d="m138.8 73c0-36.4-28.7-66.2-66-66.2s-67.1 29.8-66.7 66.2h132.7z"></path>
+  <path class="cls-1" d="m5.7 73c0.4 32.3 27.8 66.2 66.6 66.2s66.5-31.4 66.5-66.2h-133.1z"></path>
+  <path class="cls-1" d="M 41.662 73 L 102.934 73 C 103.914 73 105.385 66.6 105.385 62 C 105.385 51 99.209 30.3 73.033 29.2 C 49.995 28.2 41.662 46 40.093 55.6 C 39.113 62.6 40.682 69.3 41.662 73 Z" style=""></path>
+  <path class="cls-0" d="M 46.874 73 L 97.321 73 C 98.846 73 100.474 65.1 99.864 60 C 99.254 50 91.829 35.3 74.234 34.7 C 55.723 34 49.01 44 46.569 51.1 C 43.62 58.7 44.637 66.7 46.874 73 Z" style=""></path>
+  <path class="cls-2" d="M 43.583 71.208 C 47.984 85.818 60.378 100.32 72.474 114.821 C 82.171 102.897 94.065 90.436 100.163 74.432 L 101.165 71.208" style=""></path>
+  <path class="cls-1" d="m72.3 53.4c-4.1 0-7.8 3.1-7.8 7.6s3.2 8 7.7 8 7.6-3.4 7.7-7.3c0-4-3.5-8.3-7.6-8.3z"></path>
+</svg>
