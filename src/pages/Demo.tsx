@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { IndonesiaMap } from "../components/IndonesiaMap";
 import { InfoPanel } from "../components/InfoPanel";
+import { CAPITAL_PINS_ID } from "../data/capitalPins";
 import { Sidebar } from "../components/Sidebar";
 import { PRESETS } from "../data/themes";
 import type { SelectedRegion } from "../types/map";
@@ -42,18 +43,13 @@ const GDP_DATA_ID: Record<string, number> = {
   "id-sr": 4.8, // West Sulawesi
   "id-ma": 4.7, // Maluku
   "id-mu": 5.0, // North Maluku
-  "id-pb": 4.4, // West Papua
   "id-pa": 4.2, // Papua
+  "id-pb": 4.4, // West Papua
+  "id-ps": 4.6, // South Papua
+  "id-pt": 4.9, // Central Papua
+  "id-pe": 4.3, // Highland Papua
+  "id-pd": 4.7, // Southwest Papua
 };
-
-// Geographic coordinates are projected into the active SVG viewBox by IndonesiaMap.
-const CAPITAL_PINS_ID = [
-  { lng: 106.8272, lat: -6.1751, label: "Jakarta" },
-  { lng: 112.7508, lat: -7.2575, label: "Surabaya" },
-  { lng: 119.4238, lat: -5.1477, label: "Makassar" },
-  { lng: 104.0305, lat: 1.0456, label: "Batam" },
-  { lng: 140.7181, lat: -2.5916, label: "Jayapura" },
-];
 
 export default function Demo() {
   const [selected, setSelected] = useState<SelectedRegion>(null);

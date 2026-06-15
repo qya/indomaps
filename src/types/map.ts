@@ -56,6 +56,10 @@ export interface ThemePreset {
   "--land": string;
   "--land-hover": string;
   "--land-active": string;
+  "--city-hover": string;
+  "--city-active": string;
+  "--subdistrict-hover": string;
+  "--subdistrict-active": string;
   "--stroke": string;
   "--stroke-w": string;
   "--district": string;

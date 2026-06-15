@@ -31,6 +31,10 @@ export const INDONESIA_META: Record<string, { capital: string; pop: number }> = 
   "id-sr": { capital: "Mamuju", pop: 1_419_200 },
   "id-ma": { capital: "Ambon", pop: 1_848_900 },
   "id-mu": { capital: "Sofifi", pop: 1_299_200 },
-  "id-pb": { capital: "Manokwari", pop: 1_134_100 },
   "id-pa": { capital: "Jayapura", pop: 1_016_300 },
+  "id-pb": { capital: "Manokwari", pop: 1_134_100 },
+  "id-ps": { capital: "Merauke", pop: 522_200 },
+  "id-pt": { capital: "Nabire", pop: 1_430_000 },
+  "id-pe": { capital: "Wamena", pop: 1_430_500 },
+  "id-pd": { capital: "Sorong", pop: 617_700 },
 };

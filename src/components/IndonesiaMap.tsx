@@ -125,7 +125,7 @@ interface IndonesiaMapProps {
   onZoomMultiplierChange?: (value: number) => void;
   onSelect: (payload: SelectedRegion) => void;
   data?: Record<string, number> | null;
-  pins?: Array<{ lng: number; lat: number; label: string; x?: number; y?: number }> | null;
+  pins?: Array<{ lng: number; lat: number; label: string; provinceId?: string; x?: number; y?: number }> | null;
 }
 
 export function IndonesiaMap({
@@ -303,6 +303,18 @@ export function IndonesiaMap({
 
     if (isSelected) return theme["--land-active"];
     if (isHovered) return theme["--land-hover"];
+    return theme["--land"];
+  };
+
+  const getCityFillColor = (isSelected: boolean, isHovered: boolean) => {
+    if (isSelected) return theme["--city-active"] || theme["--land-active"];
+    if (isHovered) return theme["--city-hover"] || theme["--land-hover"];
+    return theme["--land"];
+  };
+
+  const getSubdistrictFillColor = (isSelected: boolean, isHovered: boolean) => {
+    if (isSelected) return theme["--subdistrict-active"] || theme["--city-active"] || theme["--land-active"];
+    if (isHovered) return theme["--subdistrict-hover"] || theme["--city-hover"] || theme["--land-hover"];
     return theme["--land"];
   };
 
@@ -624,6 +636,11 @@ export function IndonesiaMap({
     return `translate(${centerX} ${centerY}) scale(${multiplier}) translate(${-centerX} ${-centerY})`;
   };
 
+  const getActiveMapScale = () => {
+    if (getIndonesiaFocus()?.path) return getIndonesiaViewScale();
+    return !showConnectedMaps ? zoomMultiplier : 1;
+  };
+
   const getIndonesiaViewTransform = () => {
     const focus = getIndonesiaFocus();
     if (!focus?.path || !focus.mapData) return undefined;
@@ -810,8 +827,7 @@ export function IndonesiaMap({
           hoveredId: hoveredSubdistrict,
           onHover: setHoveredSubdistrict,
           onSelectPath: handleSubdistrictSelect,
-          getFill: (_id, selected, hovered) =>
-            selected ? theme["--land-active"] : hovered ? theme["--land-hover"] : theme["--land"],
+          getFill: (_id, selected, hovered) => getSubdistrictFillColor(selected, hovered),
           className: "max-h-[70vh]",
           labelLayer: {
             getLabel: (path) => path.title,
@@ -855,8 +871,7 @@ export function IndonesiaMap({
           hoveredId: hoveredCity,
           onHover: setHoveredCity,
           onSelectPath: handleCitySelect,
-          getFill: (_id, selected, hovered) =>
-            selected ? theme["--land-active"] : hovered ? theme["--land-hover"] : theme["--land"],
+          getFill: (_id, selected, hovered) => getCityFillColor(selected, hovered),
           className: "max-h-[70vh]",
           labelLayer: {
             getLabel: (path) => path.title,
@@ -931,9 +946,9 @@ export function IndonesiaMap({
                     const isSelected = selectedCity === path.id;
                     const isHovered = hoveredCity === path.id;
                     const fill = isSelected
-                      ? theme["--land-active"]
+                      ? theme["--city-active"] || theme["--land-active"]
                       : isHovered
-                        ? theme["--land-hover"]
+                        ? theme["--city-hover"] || theme["--land-hover"]
                         : theme["--land"];
 
                     return (
@@ -966,9 +981,9 @@ export function IndonesiaMap({
                     const isSelected = selectedSubdistrict === path.id;
                     const isHovered = hoveredSubdistrict === path.id;
                     const fill = isSelected
-                      ? theme["--land-active"]
+                      ? theme["--subdistrict-active"] || theme["--city-active"] || theme["--land-active"]
                       : isHovered
-                        ? theme["--land-hover"]
+                        ? theme["--subdistrict-hover"] || theme["--city-hover"] || theme["--land-hover"]
                         : theme["--land"];
 
                     return (
@@ -1004,20 +1019,25 @@ export function IndonesiaMap({
                         : null;
                     const x = projectedPin?.x ?? pin.x;
                     const y = projectedPin?.y ?? pin.y;
+                    const pinVisualScale = 1 / Math.max(getActiveMapScale(), 1);
 
                     if (x === undefined || y === undefined) return null;
                     return (
-                      <g key={i} className="animate-fade-in pointer-events-none">
+                      <g
+                        key={pin.provinceId ?? `${pin.label}-${i}`}
+                        className="animate-fade-in pointer-events-none"
+                        transform={`translate(${x} ${y}) scale(${pinVisualScale})`}
+                      >
                         <circle
-                          cx={x}
-                          cy={y}
+                          cx="0"
+                          cy="0"
                           r="8"
                           fill={theme["--accent"] || "#14b8a6"}
                           className="animate-ping opacity-40"
                         />
                         <circle
-                          cx={x}
-                          cy={y}
+                          cx="0"
+                          cy="0"
                           r="4"
                           fill={theme["--accent"] || "#14b8a6"}
                           stroke={theme["--sea"]}
@@ -1025,8 +1045,8 @@ export function IndonesiaMap({
                         />
                         {showLabels && (
                           <text
-                            x={x}
-                            y={y - 8}
+                            x="0"
+                            y="-10"
                             textAnchor="middle"
                             fill={theme["--label"] || "#ffffff"}
                             fontSize="8"
