@@ -32,7 +32,9 @@ export default function Playground() {
 
   const [selected, setSelected] = useState<SelectedRegion>(null);
 
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(max-width: 767px)").matches : false
+  );
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const handlePresetChange = (name: string) => {
@@ -107,7 +109,7 @@ export default function Playground() {
 
   return (
     <div
-      className="flex flex-1 overflow-hidden font-sans select-none relative"
+      className="flex min-h-0 flex-1 flex-col overflow-hidden font-sans select-none relative md:flex-row"
       style={{ background: currentTheme["--sea"] }}
     >
       {/* Sidebar Controls Panel */}
@@ -115,7 +117,7 @@ export default function Playground() {
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
       >
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-7 scrollbar-thin">
+        <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4 scrollbar-thin md:space-y-7 md:px-6 md:py-5">
 
           {/* Presets Grid */}
           <div>
@@ -184,7 +186,7 @@ export default function Playground() {
         </div>
 
         {/* Dock Controls */}
-        <div className="border-t border-white/5 bg-black/10 p-5 space-y-3 font-sans">
+        <div className="space-y-3 border-t border-white/5 bg-black/10 p-4 font-sans md:p-5">
           <button
             onClick={handleExportSVG}
             className="w-full flex items-center justify-center gap-2 rounded-lg bg-teal-400 hover:bg-teal-300 text-slate-950 font-bold py-2.5 px-4 shadow-sm hover:shadow-md transition-all text-xs uppercase tracking-wider"
@@ -203,10 +205,10 @@ export default function Playground() {
       </Sidebar>
 
       {/* Main Map Stage */}
-      <main className="flex-1 relative flex flex-col h-full overflow-hidden">
+      <main className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
         {/* Dynamic Title Overlay Header */}
         <div
-          className={`absolute top-6 left-16 md:left-7 z-10 pointer-events-none transition-all duration-300 ${
+          className={`absolute top-4 left-4 z-10 max-w-[calc(100vw-2rem)] pointer-events-none transition-all duration-300 md:top-6 md:left-7 ${
             isBackgroundLight() ? "text-slate-900" : "text-white"
           }`}
         >
@@ -222,9 +224,9 @@ export default function Playground() {
         </div>
 
         {/* Map Layer Mode HUD Controls (Top Right) */}
-        <div className="absolute top-5 right-6 z-10 flex items-center gap-3">
+        <div className="absolute inset-x-3 top-20 z-10 flex max-w-[calc(100vw-1.5rem)] items-center gap-3 md:inset-x-auto md:top-5 md:right-6">
           {/* Map Layer HUD Controls */}
-          <div className="flex rounded-lg border border-white/5 bg-slate-950/70 p-1 backdrop-blur-md">
+          <div className="flex max-w-full overflow-x-auto rounded-lg border border-white/5 bg-slate-950/80 p-1 backdrop-blur-md scrollbar-thin">
             {/* Districts Toggle */}
             <button
               onClick={() => handleToggle("districts")}
@@ -289,7 +291,7 @@ export default function Playground() {
         <InfoPanel selected={selected} onClose={() => setSelected(null)} />
 
         {/* Map Canvas */}
-        <div className="flex-1 w-full h-full flex items-center justify-center">
+        <div className="flex min-h-[46dvh] flex-1 items-center justify-center">
           <IndonesiaMap
             theme={currentTheme}
             showDistricts={toggles.districts}
@@ -302,7 +304,7 @@ export default function Playground() {
 
         {/* Lower Left Sign HUD Overlay */}
         <div
-          className={`absolute bottom-5 left-7 z-10 text-[9px] font-mono tracking-wider transition-opacity duration-300 pointer-events-none uppercase ${
+          className={`absolute bottom-4 left-4 z-10 hidden text-[9px] font-mono tracking-wider transition-opacity duration-300 pointer-events-none uppercase sm:block md:bottom-5 md:left-7 ${
             isBackgroundLight() ? "text-slate-900/40" : "text-white/30"
           }`}
         >
@@ -313,7 +315,7 @@ export default function Playground() {
 
       {/* Toast Overlay Notification */}
       {toastMessage && (
-        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl bg-teal-400 text-slate-950 font-bold px-5 py-3.5 shadow-2xl transition-all duration-300 text-xs uppercase tracking-wider">
+        <div className="absolute bottom-4 left-1/2 z-50 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-2 rounded-xl bg-teal-400 px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-950 shadow-2xl transition-all duration-300 sm:bottom-20 sm:px-5 sm:py-3.5">
           <CheckCircle size={14} />
           <span>{toastMessage}</span>
         </div>

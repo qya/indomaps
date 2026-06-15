@@ -24,7 +24,7 @@ function DocumentTitle() {
 
 export default function App() {
   return (
-    <div className="h-screen w-screen overflow-hidden flex flex-col">
+    <div className="app-shell flex h-dvh w-screen overflow-hidden flex-col">
       <Router>
         <DocumentTitle />
         <Routes>

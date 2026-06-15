@@ -9,6 +9,27 @@ type ZoomLevel = "full" | "province" | "district" | "subdistrict";
 const ZOOM_MAX = 5;
 const ZOOM_STEP = 0.05;
 
+function getInitialProvince(selection: SelectedRegion): string | null {
+  if (!selection) return null;
+  return typeof selection === "string" ? selection : selection.state || null;
+}
+
+function getInitialCity(selection: SelectedRegion): string | null {
+  return selection && typeof selection === "object" ? selection.cityId || null : null;
+}
+
+function getInitialSubdistrict(selection: SelectedRegion): string | null {
+  return selection && typeof selection === "object" ? selection.subdistrictId || null : null;
+}
+
+function getInitialZoomLevel(selection: SelectedRegion): ZoomLevel {
+  if (!selection) return "full";
+  if (typeof selection === "string") return "province";
+  if (selection.subdistrictId) return "subdistrict";
+  if (selection.cityId) return "district";
+  return selection.state ? "province" : "full";
+}
+
 function brightenGridColor(grid: string): string {
   const rgba = grid.match(/^rgba?\((.+)\)$/);
   if (!rgba) return "rgba(255, 255, 255, 0.14)";
@@ -125,21 +146,29 @@ export function IndonesiaMap({
   const [loadingNational, setLoadingNational] = useState(true);
 
   const [hoveredProvince, setHoveredProvince] = useState<string | null>(null);
-  const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
+  const [selectedProvince, setSelectedProvince] = useState<string | null>(() =>
+    getInitialProvince(initialSelection ?? null)
+  );
 
   const [cityMapData, setCityMapData] = useState<ParsedMapData | null>(null);
   const [loadingCities, setLoadingCities] = useState(false);
   const [hoveredCity, setHoveredCity] = useState<string | null>(null);
-  const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [selectedCity, setSelectedCity] = useState<string | null>(() =>
+    getInitialCity(initialSelection ?? null)
+  );
 
   const [subdistrictMapData, setSubdistrictMapData] = useState<ParsedMapData | null>(null);
   const [loadingSubdistricts, setLoadingSubdistricts] = useState(false);
   const [hoveredSubdistrict, setHoveredSubdistrict] = useState<string | null>(null);
-  const [selectedSubdistrict, setSelectedSubdistrict] = useState<string | null>(null);
+  const [selectedSubdistrict, setSelectedSubdistrict] = useState<string | null>(() =>
+    getInitialSubdistrict(initialSelection ?? null)
+  );
   const [zoomMultiplierInternal, setZoomMultiplierInternal] = useState(1);
   const zoomMultiplier = zoomMultiplierProp ?? zoomMultiplierInternal;
   const setZoomMultiplier = onZoomMultiplierChange ?? setZoomMultiplierInternal;
-  const [zoomLevel, setZoomLevel] = useState<ZoomLevel>("full");
+  const [zoomLevel, setZoomLevel] = useState<ZoomLevel>(() =>
+    getInitialZoomLevel(initialSelection ?? null)
+  );
 
   useEffect(() => {
     import("../utils/mapData")
@@ -148,44 +177,6 @@ export function IndonesiaMap({
       .catch((err) => console.error("Failed to load national map:", err))
       .finally(() => setLoadingNational(false));
   }, []);
-
-  useEffect(() => {
-    if (!initialSelection) return;
-
-    if (typeof initialSelection === "string") {
-      setSelectedProvince(initialSelection);
-      setZoomLevel("province");
-      return;
-    }
-
-    if (initialSelection.state) {
-      setSelectedProvince(initialSelection.state);
-      setZoomLevel("province");
-    }
-  }, [initialSelection]);
-
-  useEffect(() => {
-    if (!initialSelection || typeof initialSelection === "string" || !initialSelection.cityId || !cityMapData) {
-      return;
-    }
-
-    setSelectedCity(initialSelection.cityId);
-    setZoomLevel(initialSelection.subdistrictId ? "subdistrict" : "district");
-  }, [initialSelection, cityMapData]);
-
-  useEffect(() => {
-    if (
-      !initialSelection ||
-      typeof initialSelection === "string" ||
-      !initialSelection.subdistrictId ||
-      !subdistrictMapData
-    ) {
-      return;
-    }
-
-    setSelectedSubdistrict(initialSelection.subdistrictId);
-    setZoomLevel("subdistrict");
-  }, [initialSelection, subdistrictMapData]);
 
   useEffect(() => {
     if (!selectedProvince) {
@@ -730,14 +721,14 @@ export function IndonesiaMap({
     positioned?: boolean;
   }) => (
     <div
-      className={`flex max-w-[min(640px,calc(100vw-2.5rem))] items-center gap-3 rounded-lg border border-white/10 bg-slate-950/90 px-3 py-2.5 shadow-xl backdrop-blur-md ${
-        positioned ? "absolute bottom-5 left-5 z-20" : "w-full"
+      className={`flex max-w-[min(640px,calc(100vw-1.5rem))] items-center gap-2 overflow-x-auto rounded-lg border border-white/10 bg-slate-950/90 px-3 py-2.5 shadow-xl backdrop-blur-md scrollbar-thin sm:gap-3 ${
+        positioned ? "absolute bottom-3 left-3 z-20 sm:bottom-5 sm:left-5" : "w-full"
       }`}
     >
       {backLabel && onBack && (
         <button
           onClick={onBack}
-          className="shrink-0 whitespace-nowrap rounded-md border border-white/10 bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-slate-800"
+          className="shrink-0 whitespace-nowrap rounded-md border border-white/10 bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-slate-800 sm:py-1.5"
           type="button"
         >
           ← {backLabel}
@@ -757,7 +748,7 @@ export function IndonesiaMap({
               setZoomLevel(event.target.value as ZoomLevel);
               setZoomMultiplier(1);
             }}
-            className="min-w-0 max-w-28 rounded-md border border-white/5 bg-slate-900 px-2 py-1 text-xs font-semibold text-slate-200 outline-none transition-colors focus:border-teal-400"
+            className="min-w-24 rounded-md border border-white/5 bg-slate-900 px-2 py-2 text-xs font-semibold text-slate-200 outline-none transition-colors focus:border-teal-400 sm:max-w-28 sm:py-1"
             aria-label="Zoom level"
           >
             <option value="full">Indonesia</option>
@@ -786,7 +777,7 @@ export function IndonesiaMap({
         step={ZOOM_STEP}
         value={zoomMultiplier}
         onChange={(event) => setZoomMultiplier(Number(event.target.value))}
-        className="h-1 w-28 min-w-16 shrink accent-teal-400 sm:w-40"
+        className="h-2 w-28 min-w-20 shrink accent-teal-400 sm:h-1 sm:w-40"
         aria-label="Map zoom"
       />
       <span className="w-10 shrink-0 text-right text-xs font-mono tabular-nums text-slate-200">

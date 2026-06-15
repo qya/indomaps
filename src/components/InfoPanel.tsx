@@ -95,7 +95,7 @@ export function InfoPanel({ selected, onClose }: InfoPanelProps) {
   }
 
   return (
-    <div className="absolute bottom-4 right-4 z-20 w-80 max-w-[90vw] max-h-[85vh] overflow-y-auto rounded-xl border border-white/10 bg-slate-900/90 p-6 shadow-2xl backdrop-blur-md transition-all duration-300 scrollbar-thin">
+    <div className="absolute inset-x-3 bottom-3 z-20 max-h-[42dvh] overflow-y-auto rounded-xl border border-white/10 bg-slate-900/95 p-4 shadow-2xl backdrop-blur-md transition-all duration-300 scrollbar-thin sm:inset-x-auto sm:right-4 sm:bottom-4 sm:w-80 sm:max-w-[90vw] sm:max-h-[85vh] sm:p-6">
       <button
         onClick={onClose}
         className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
@@ -108,7 +108,7 @@ export function InfoPanel({ selected, onClose }: InfoPanelProps) {
         <span className="text-[10px] font-bold tracking-wider text-teal-400 uppercase">
           {kicker}
         </span>
-        <h3 className="mt-1 text-2xl font-bold text-white capitalize">{title}</h3>
+        <h3 className="mt-1 pr-7 text-xl font-bold capitalize text-white sm:text-2xl">{title}</h3>
         {!isCity && meta.capital && (
           <p className="text-xs text-slate-400 italic mt-0.5">Capital · {meta.capital}</p>
         )}
@@ -118,10 +118,10 @@ export function InfoPanel({ selected, onClose }: InfoPanelProps) {
         {rows.map((row) => (
           <div
             key={row.label}
-            className="flex items-center justify-between text-sm py-1 border-b border-white/[0.03]"
+            className="flex items-start justify-between gap-3 border-b border-white/[0.03] py-1 text-sm"
           >
             <span className="text-slate-400 font-medium">{row.label}</span>
-            <span className="text-slate-200 font-semibold text-right max-w-[55%]">{row.value}</span>
+            <span className="max-w-[58%] break-words text-right font-semibold text-slate-200">{row.value}</span>
           </div>
         ))}
       </div>

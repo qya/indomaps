@@ -22,9 +22,9 @@ export interface GeoJSONFeatureCollection {
 declare global {
   namespace GeoJSON {
     type Position = GeoJSONPosition;
-    interface Geometry extends GeoJSONGeometry {}
-    interface Feature extends GeoJSONFeature {}
-    interface FeatureCollection extends GeoJSONFeatureCollection {}
+    type Geometry = GeoJSONGeometry;
+    type Feature = GeoJSONFeature;
+    type FeatureCollection = GeoJSONFeatureCollection;
   }
 }
 

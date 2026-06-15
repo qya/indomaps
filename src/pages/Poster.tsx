@@ -117,7 +117,9 @@ export default function Poster() {
   const [title, setTitle] = useState("");
   const [exportQuality, setExportQuality] = useState<ExportQuality>("print150");
   const [selected, setSelected] = useState<SelectedRegion>(() => handoff?.selected ?? null);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(max-width: 767px)").matches : false
+  );
   const [mapControlsHost, setMapControlsHost] = useState<HTMLDivElement | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [isPreparingPrint, setIsPreparingPrint] = useState(false);
@@ -277,16 +279,16 @@ export default function Poster() {
 
   return (
     <div
-      className="poster-print-root flex flex-1 min-h-screen bg-[#242424] text-slate-300 font-sans"
+      className="poster-print-root flex min-h-0 flex-1 flex-col bg-[#242424] font-sans text-slate-300 md:flex-row"
       data-poster-orientation={orientation}
       data-poster-size={size}
     >
-      <div className="print:hidden shrink-0">
+      <div className="shrink-0 print:hidden">
         <Sidebar
           isCollapsed={isSidebarCollapsed}
           onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
         >
-          <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6 scrollbar-thin">
+          <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4 scrollbar-thin md:space-y-6 md:px-5 md:py-5">
             <SectionLabel>Size</SectionLabel>
             <div className="space-y-3">
               <select
@@ -422,7 +424,7 @@ export default function Poster() {
             )}
           </div>
 
-          <div className="border-t border-white/10 p-5 space-y-3">
+          <div className="space-y-3 border-t border-white/10 p-4 md:p-5">
             <SectionLabel>Export</SectionLabel>
             <SegmentedControl
               value={exportQuality}
@@ -473,7 +475,7 @@ export default function Poster() {
         </Sidebar>
       </div>
 
-      <main className="poster-preview-stage flex flex-1 flex-col items-center justify-center overflow-y-auto p-6 md:p-10 print:p-0 print:overflow-visible">
+      <main className="poster-preview-stage flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto p-4 sm:p-6 md:p-10 print:p-0 print:overflow-visible">
         <div
           ref={posterRef}
           id="poster-print-area"
@@ -481,7 +483,7 @@ export default function Poster() {
           style={{
             aspectRatio: previewAspect,
             width: orientation === "portrait" ? "min(100%, 420px)" : "min(100%, 620px)",
-            maxHeight: "calc(100vh - 120px)",
+            maxHeight: "min(calc(100dvh - 120px), 78dvh)",
             backgroundColor: PAPER_COLOR,
           }}
         >
