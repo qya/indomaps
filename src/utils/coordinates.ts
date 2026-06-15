@@ -38,11 +38,11 @@ function getFeatureCentroid(feature: GeoJSON.Feature): { lat: number; lng: numbe
   };
 
   if (geom.type === "Polygon") {
-    for (const ring of geom.coordinates) {
+    for (const ring of geom.coordinates as number[][][]) {
       trackRing(ring);
     }
   } else {
-    for (const polygon of geom.coordinates) {
+    for (const polygon of geom.coordinates as number[][][][]) {
       for (const ring of polygon) {
         trackRing(ring);
       }

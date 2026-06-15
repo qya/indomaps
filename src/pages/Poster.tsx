@@ -17,7 +17,12 @@ import type { SelectedRegion } from "../types/map";
 import type { PlaygroundHandoff } from "../types/posterHandoff";
 import { INDONESIA_DEFAULT_COORDS, resolveSelectionCoordinates } from "../utils/coordinates";
 import { getSelectionDetails } from "../utils/selectionDetails";
-import { downloadPosterPng, downloadPosterSvg, serializePosterMapSvg } from "../utils/posterExport";
+import {
+  downloadPosterPng,
+  downloadPosterSvg,
+  preparePrintMapFallback,
+  serializePosterMapSvg,
+} from "../utils/posterExport";
 
 const PAPER_COLOR = "#f4f0e8";
 
@@ -115,6 +120,7 @@ export default function Poster() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [mapControlsHost, setMapControlsHost] = useState<HTMLDivElement | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [isPreparingPrint, setIsPreparingPrint] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [coordinates, setCoordinates] = useState(INDONESIA_DEFAULT_COORDS);
 
@@ -177,45 +183,73 @@ export default function Poster() {
     setMapZoom(1);
   };
 
-  const handlePrint = () => {
-    if (posterRef.current) {
-      const liveSvg = serializePosterMapSvg(posterRef.current);
-      const fallback = posterRef.current.querySelector(
-        ".poster-print-map-fallback"
-      ) as HTMLImageElement | null;
-      if (liveSvg && fallback) {
-        fallback.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(liveSvg)}`;
+  const handlePrint = async () => {
+    setIsPreparingPrint(true);
+    try {
+      if (posterRef.current) {
+        await preparePrintMapFallback(posterRef.current);
       }
-    }
 
-    const style = document.createElement("style");
-    style.id = "poster-print-page";
-    style.textContent = `@page { size: ${size} ${orientation}; margin: 0; }`;
-    document.head.appendChild(style);
-    window.print();
-    window.addEventListener(
-      "afterprint",
-      () => {
-        style.remove();
-      },
-      { once: true }
-    );
+      const style = document.createElement("style");
+      style.id = "poster-print-page";
+      style.textContent = `@page { size: ${size} ${orientation}; margin: 0; }`;
+      document.head.appendChild(style);
+      window.print();
+      window.addEventListener(
+        "afterprint",
+        () => {
+          style.remove();
+        },
+        { once: true }
+      );
+    } finally {
+      setIsPreparingPrint(false);
+    }
   };
 
   useEffect(() => {
-    const preparePrintMap = () => {
-      if (!posterRef.current) return;
-      const liveSvg = serializePosterMapSvg(posterRef.current);
-      const fallback = posterRef.current.querySelector(
-        ".poster-print-map-fallback"
-      ) as HTMLImageElement | null;
-      if (!liveSvg || !fallback) return;
-      fallback.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(liveSvg)}`;
+    const posterRoot = posterRef.current;
+    if (!posterRoot) return;
+
+    const rafId = requestAnimationFrame(() => {
+      void preparePrintMapFallback(posterRoot);
+    });
+
+    return () => cancelAnimationFrame(rafId);
+  }, [currentTheme, connectedMaps, showDistricts, selected, posterTitle, mapZoom]);
+
+  useEffect(() => {
+    const mapSlot = posterRef.current?.querySelector(".poster-map-slot");
+    if (!mapSlot) return;
+
+    let rafId = 0;
+    const scheduleWarm = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const posterRoot = posterRef.current;
+        if (posterRoot) void preparePrintMapFallback(posterRoot);
+      });
     };
 
-    window.addEventListener("beforeprint", preparePrintMap);
-    return () => window.removeEventListener("beforeprint", preparePrintMap);
-  }, [currentTheme, connectedMaps, showDistricts, selected, posterTitle, mapZoom]);
+    scheduleWarm();
+
+    const observer = new MutationObserver(scheduleWarm);
+    observer.observe(mapSlot, { childList: true, subtree: true });
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      observer.disconnect();
+    };
+  }, [connectedMaps]);
+
+  useEffect(() => {
+    const onBeforePrint = () => {
+      if (posterRef.current) void preparePrintMapFallback(posterRef.current);
+    };
+
+    window.addEventListener("beforeprint", onBeforePrint);
+    return () => window.removeEventListener("beforeprint", onBeforePrint);
+  }, []);
 
   const handleDownloadPng = async () => {
     setIsExporting(true);
@@ -423,9 +457,10 @@ export default function Poster() {
             <button
               type="button"
               onClick={handlePrint}
-              className="flex w-full items-center justify-center rounded-md border border-white/10 py-2 text-[11px] font-medium text-slate-500 transition-colors hover:bg-white/5 hover:text-slate-300"
+              disabled={isPreparingPrint}
+              className="flex w-full items-center justify-center rounded-md border border-white/10 py-2 text-[11px] font-medium text-slate-500 transition-colors hover:bg-white/5 hover:text-slate-300 disabled:opacity-50"
             >
-              Print poster
+              {isPreparingPrint ? "Preparing print…" : "Print poster"}
             </button>
 
             <p className="text-[10px] leading-relaxed text-slate-600">

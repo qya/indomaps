@@ -33,6 +33,77 @@ export function serializePosterMapSvg(posterRoot: HTMLElement): string | null {
   return new XMLSerializer().serializeToString(svg);
 }
 
+function loadPrintFallbackImage(
+  image: HTMLImageElement,
+  src: string,
+  contentKey: string
+): Promise<boolean> {
+  if (
+    image.dataset.printContentKey === contentKey &&
+    image.complete &&
+    image.naturalWidth > 0
+  ) {
+    return Promise.resolve(true);
+  }
+
+  image.dataset.printContentKey = contentKey;
+
+  return new Promise((resolve) => {
+    const finish = (ok: boolean) => {
+      image.removeEventListener("load", onLoad);
+      image.removeEventListener("error", onError);
+      resolve(ok);
+    };
+    const onLoad = () => finish(true);
+    const onError = () => finish(false);
+
+    image.addEventListener("load", onLoad);
+    image.addEventListener("error", onError);
+    image.src = src;
+
+    if (image.complete) {
+      finish(image.naturalWidth > 0);
+    }
+  });
+}
+
+/** Snapshot the live map into the print fallback <img> and wait until it is paint-ready. */
+export async function preparePrintMapFallback(
+  posterRoot: HTMLElement,
+  options: { maxAttempts?: number; retryDelayMs?: number } = {}
+): Promise<boolean> {
+  const { maxAttempts = 8, retryDelayMs = 75 } = options;
+  const fallback = posterRoot.querySelector(
+    ".poster-print-map-fallback"
+  ) as HTMLImageElement | null;
+  if (!fallback) return false;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const liveSvg = serializePosterMapSvg(posterRoot);
+    if (liveSvg) {
+      const src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(liveSvg)}`;
+      const loaded = await loadPrintFallbackImage(fallback, src, liveSvg);
+      if (!loaded) return false;
+
+      if (typeof fallback.decode === "function") {
+        try {
+          await fallback.decode();
+        } catch {
+          // decode() can reject for some SVG payloads even after load
+        }
+      }
+
+      return true;
+    }
+
+    if (attempt < maxAttempts - 1) {
+      await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+    }
+  }
+
+  return false;
+}
+
 export async function buildPosterSvg(options: PosterExportOptions): Promise<string> {
   const fallbackSea = options.theme["--sea"] ?? "#06162f";
   let mapContent: { viewBox: string; inner: string; sea: string };
