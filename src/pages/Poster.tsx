@@ -15,11 +15,11 @@ import {
 } from "../data/posterSizes";
 import type { SelectedRegion } from "../types/map";
 import type { PlaygroundHandoff } from "../types/posterHandoff";
+import { INDONESIA_DEFAULT_COORDS, resolveSelectionCoordinates } from "../utils/coordinates";
 import { getSelectionDetails } from "../utils/selectionDetails";
 import { downloadPosterPng, downloadPosterSvg, serializePosterMapSvg } from "../utils/posterExport";
 
 const PAPER_COLOR = "#f4f0e8";
-const DEFAULT_COORDS = "0.789° S / 113.921° E";
 
 function SectionLabel({ children }: { children: ReactNode }) {
   return (
@@ -116,10 +116,24 @@ export default function Poster() {
   const [mapControlsHost, setMapControlsHost] = useState<HTMLDivElement | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [coordinates, setCoordinates] = useState(INDONESIA_DEFAULT_COORDS);
 
   const selectedDetails = getSelectionDetails(selected);
   const posterTitle = selectedDetails.isSelected ? selectedDetails.title : title || "Indonesia";
-  const coordinates = DEFAULT_COORDS;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    resolveSelectionCoordinates(selected).then((coords) => {
+      if (!cancelled) {
+        setCoordinates(coords);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selected]);
 
   const dimensions = useMemo(
     () => getPosterDimensions(size, orientation, EXPORT_DPI[exportQuality]),
